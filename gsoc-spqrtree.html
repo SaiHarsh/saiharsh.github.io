@@ -119,7 +119,7 @@
                     <div class="col-md-12 text-center">
                         <h2> Google Summer of Code 2018 </h2>
                         <h2> A Linear Time Implementation of SPQR-Trees </h2>
-                        <p> This project is part of GSoC-2018, In this project, a python module is developed which first generate triconnected components then construct SPQR-Tree in linear time. The module is to be integrated into SageMath graph library and was developed under the guidance of David Coudert and Dima Pasechnik, the implementation algorithm first proposed by Hopcroft and Tarjan<a href="#Reference">[1]</a> and later corrected by Gutwenger and Mutzel<a href="#Reference">[2]</a> </p>
+                        <p> This project is part of GSoC-2018. In this project, a python module is developed which first generates triconnected components then constructs SPQR-Tree in linear time. The module is to be integrated into SageMath graph library and was developed under the guidance of David Coudert and Dima Pasechnik. The implementation algorithm was first proposed by Hopcroft and Tarjan<a href="#Reference">[1]</a> and later corrected by Gutwenger and Mutzel<a href="#Reference">[2]</a> </p>
                     </div>
                 </div>
                 <div class="row">
@@ -130,15 +130,15 @@
                                     <h3> Getting started </h3>
                                 </li>
                                 <li>
-                                    <p>In the initial weeks, to get hands-on experience sagemath development, I started working on <a href="https://trac.sagemath.org/ticket/25123">#25123</a>(Merged) which estimate the closeness centrality of nodes in a graph.</p>
+                                    <p>In the initial weeks, to get a hands-on experience on sagemath development, I started working on <b><a href="https://trac.sagemath.org/ticket/25123">#25123</a></b>(Merged) which estimate's the closeness centrality of nodes in a graph.</p>
                                     <p>
-                                        <i>Definition:</i> closeness centrality (or closeness) of a node in a connected undirected graph, is calculated as the inverse of average of the shortest paths between the node to all other nodes in the graph. Thus the more central a node is, the closer it is to all other nodes.
+                                        <i>Definition:</i> closeness centrality (or closeness) of a node in a connected undirected graph is calculated as the inverse of average of the shortest paths between the node to all other nodes in the graph. Thus the more central a node is, the closer it is to all other nodes.
                                     </p>
                                     <p>
                                         It was first defined by Bavelas (1950)<a href="#Reference">[3]</a>, on a connected undirected Graph G = (V, E) and n = number of vertices = |V|, an inverse of <i>fareness</i>, where farness is inverse of average of the shortest paths from v to u \( \in  \) V,  below is the algorithm.
                                     </p>
                                 </li>
-                            </ul>
+                            </ul class="wow fadeInUp animated " data-wow-delay=".4s">
                             <ol>
                                 <li> <p> \(S\) = k random vertices from n vertices of input graph G.  </p> </li>
                                 <li> <p> Run k time BFS from the vertices in \(S\). Which will give k*n distances, where n is no. of vertices.</p> </li>
@@ -148,7 +148,7 @@
                             </ol>
                     </div>
                     <div class="col-md-12">
-                       <p> While implementing this algorithm in cython, we found that there is a scope to improve the existing definition of simple_bfs, which leads to creating the patch <a href="https://trac.sagemath.org/ticket/25223">#25223</a>(Merged), in which we made the definition of simple_bfs function more user-friendly and updated all the dependent functions of simple_bfs function. by end of this two patches, I got the good knowledge of cython and sagemath code base.  </p>
+                       <p> While implementing this algorithm in cython, we found that there is a scope to improve the existing definition of simple_bfs, which leads to creating the patch <b><a href="https://trac.sagemath.org/ticket/25223">#25223</a></b>(Merged), in which we made the definition of simple_bfs function more user-friendly and updated all the dependent functions of simple_bfs function. by end of this two patches, I got the good knowledge of cython and sagemath code base.  </p>
                     </div>
                     <div class="col-md-12">
                         <ul class="wow fadeInUp animated " data-wow-delay=".4s">
@@ -156,22 +156,22 @@
                         </ul>
                     <div class="col-md-12"> 
                         <p> starting the coding part </p>
-                        <p> Before starting the main coding part we need to decide in which file we are supposed to add the function, this leads to creates a new file connectivity.pyx, it includes all the function which uses cut vertices or cut edges. ticket <a href="https://trac.sagemath.org/ticket/25436">#25436</a>(Merged) which completed with the help of Meghana M Reddy. </p>
+                        <p> Before starting the main coding part we need to decide in which file we are supposed to add the function, this leads to creates a new file connectivity.pyx, it includes all the function from generic_graph.py / graph.py / digraph.py which uses cut vertices or cut edges. ticket <b><a href="https://trac.sagemath.org/ticket/25436">#25436</a></b>(Merged) which is completed with the help of Meghana M Reddy. </p>
                         <br>
                         <b> Method 1: Cleave </b>
                         <br> <br>
                         <p> Cleave: For a connected unweighted multi-graph G and a vertex cut X, it computes the list of subgraphs of \(G\) induced by each connected component \(c\) of \(G\setminus X\) plus \(X\), i.e., \(G[c\cup X]\) </p>
-                        <ul>
+                        <ul class="wow fadeInUp animated " data-wow-delay=".4s">
                             <li> <p> It returns 3 lists, </p> </li>
-                            <li> <p> 1. S = Connected component with cut vertices have virtual edges.</p> </li>
+                            <li> <p> 1. S = List of connected component with cut vertices have virtual edges.</p> </li>
                             <li> <p> 2. C = is the graph of the cocycles, set of virtual edges created/added in connected components + one extra copy. </p> </li>
-                            <li> <p>3. f = It's a graph with vertex cut and virtual edges. </p> </li>
+                            <li> <p>3. f = It's a graph with vertex cut and virtual edges. i.e the complement of the subgraph of ``G`` induced by the vertex cut</p> </li>
                             <li> <p>Algorithm:</p> </li>
                             <li> <p> Input: Multi-Graph G, cut_vertex list </p> </li>
                             <li> <p> Output: S, C, f </p> </li>
                         </ul>
                         <ol>
-                            <li> <p> If user gave cut vertices validate it else create a cut vertex list from graph G.</p> </li>
+                            <li> <p> If cut vertices are given validate it, else create a cut vertex list from graph G.</p> </li>
                             <li> <p> Find connected components after removing cut vertices from cut vertex list.</p> </li>
                             <li> <p> To find what are the virtual edges need to be added, 
                             first, find a subgraph with cut vertices then construct its complement graph, all the edges it has we need to add it in the connected component, which is f(virtual cut graph).</p> </li>
@@ -180,13 +180,13 @@
                         </ol>
                     </div>
                     <div class="col-md-12">
-                        <p> This method is extended with allowing the user to disable adding of virtual edges if virtual_edge==false then f is a graph with isolated cut vertice i.e independent set. </p>
+                        <p> This method is extended with allowing the user to disable adding of virtual edges in connected components if virtual_edge==false then f is a graph with isolated cut vertice i.e independent set. </p>
                         <br>
                         Step 2: construction of SPQR-Tree using Cleave function as helper function.
                         <br> <br>
                         <p> <i>Definition</i>: The data structure SPQR-tree represents the decomposition of a biconnected graph with respect to its triconnected components.</p>
                         <p> The vertices of SPQR-Tree with being either of 4 types given below.</p>
-                        <ol>
+                        <ol class="wow fadeInUp animated " data-wow-delay=".5s">
                             <li> <p> S (Series) Type: A cyclic graph with atleast 3 vertices. </p> </li>
                             <li> <p> P (parallel) Type: A multi-graph with 2 vertices and multiple edges between them. </p> </li>
                             <li> <p> Q (Trivial case) Type: the associated graph has a single real edge. This trivial case is necessary to handle the graph that has only one edge. </p> </li>
@@ -222,11 +222,11 @@
                         <p> Algorithm: </p>
                         <ol>
                             <li> <p> Make two dictionaries namely count_p and count_g for all vertices in Tree, if the vertex has P or Q label, update count_p with edges and there count. similarly, for S and R label vertices update count_g dict. </p></li>
-                            <li> <p> Iterate over all the edges of count_g if that edge is available then num = count_p[edge] - count_g[e] and add num number of times edge in H. </p></li>
+                            <li> <p> Iterate over all the edges of count_g if that edge is available then num = count_p[edge] - count_g[e] and add num no. of times edge in H. </p></li>
                             <li> <p> Not Iterate over all the edges in count_p and if that edge is not available in count_g add directly that edge with it's respective count from count_p in H. </p></li>
                             <li> <p> return H </p></li>
                         </ol>
-                        <p> The complete work of method 1 is done in ticket <a href="https://trac.sagemath.org/ticket/22157">#22157</a>(Merged) </p>
+                        <p> The complete work of method 1 is done in ticket <b><a href="https://trac.sagemath.org/ticket/22157">#22157</a></b>(Merged) </p>
                         <b> Method 2: Hopcroft_Tarjan<a href="#Reference">[1]</a> </b>
                         <p> The linear time algorithm of SPQR-Tree. </p>
                         <p> Input: Multi-Graph </p>
@@ -239,7 +239,7 @@
                         <p> <b> Module 4:</b> Construction of SPQR-Tree, After finding Triconnected components which is the most challenging part, construction of tree becomes easier, connect all the components(tree vertices) using virtual edges, one virtual edge will connect two components(two tree vertices). </p>
                         <p> Module 2 and Module 3 are done by Meghana M reddy and remaining Module 1 & 4 are done by me. </p>
                         <p> The output of the code is tested by spqrtree_to_graph function i.e which is developed in method 1. Method 1 mostly act as verification code for method 2. Method 2 running time is in linear order which is much better than method 1. </p>
-                        <p> The complete work of method 2 is done in ticket <a href="https://trac.sagemath.org/ticket/25598">#25598</a>, it's in the process of getting merge. </p>
+                        <p> The complete work of method 2 is done in ticket <b><a href="https://trac.sagemath.org/ticket/25598">#25598</a></b>, it's in the process of getting merge. </p>
                         <h2> <b> GSoC Experience: <b></h2>
                         <p>
                             It was a great experience working with SageMath, I learned how one should code/write the comments such that if anyone is going to use/modify my work should spend the least time in understanding it. Not only this, it gave me an opportunity to explore how actually open source organization works, I am grateful that I got this opportunity. My mentors David Coudert and Dima Pasechnik are very supportive not only in giving guidance but also helping in coding side.
