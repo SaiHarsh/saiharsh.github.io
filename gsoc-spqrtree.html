@@ -146,16 +146,18 @@
                                         <i>Definition:</i> closeness centrality (or closeness) of a node in a connected undirected graph is calculated as the inverse of average of the shortest paths between the node to all other nodes in the graph. Thus the more central a node is, the closer it is to all other nodes.
                                     </p>
                                     <p>
-                                        It was first defined by Bavelas (1950)<a href="#Reference">[3]</a>, on a connected undirected Graph G = (V, E), |V| = n = number of vertices , an inverse of <i>farness</i>, where farness is the inverse of average of the shortest paths from v to u \( \in  \) V. </p>
-                                        <b> Algorithm: </b>
+                                        It was first defined by Bavelas (1950)<a href="#Reference">[3]</a>, on a connected undirected Graph G = (V, E), |V| = n = number of vertices , an inverse of <i>farness</i>, where farness is the inverse of average of the shortest paths from v to u \( \in  \) V. 
                                     </p>
+                                    <p> <b> Algorithm: </b> </p>
+                                    <p> <b> Input: </b> Connected Undirected Graph</p>
+                                    <p> <b> Output: </b> Dict with vertices as key and value as closeness centrality</p>
                                 </li>
                             </ul >
                             <ol>
                                 <li> <p> \(S\) = k random vertices from n vertices of input graph G.  </p> </li>
-                                <li> <p> Run k times BFS from the vertices in \(S\), which will give k*n distances.</p> </li>
-                                <li> <p> For each vertex in \(S\), closeness centrality will be actual value, which is </p> </li> \( C^{-1}(v) = (n-1)/\sum\limits_{u \in V} d_{vu} \) 
-                                <li> <p> For remaining n - k vertices we need to estimate the closeness centrality which is calculated as:</p> </li>
+                                <li> <p> Run BFS k times from the vertices in \(S\), which will give k*n distances.</p> </li>
+                                <li> <p> for each vertex in \(S\), closeness centrality will be actual value, which is </p> </li> \( C^{-1}(v) = (n-1)/\sum\limits_{u \in V} d_{vu} \) 
+                                <li> <p> for remaining (n - k) vertices we need to estimate the closeness centrality which is calculated as:</p> </li>
                                     \( C^{-1}(v) = k/\sum\limits_{u \in S} d_{vu} \)
                             </ol>
                     </div>
@@ -168,9 +170,9 @@
                         </ul>
                     <div class="col-md-12">
                          <p> Starting the coding part </p>
-                        <p> We need to decide in which file we are supposed to add the function, this leads to create a new file connectivity.pyx, it includes all the functions from generic_graph.py / graph.py / digraph.py which uses cut vertices/cut edges. Ticket <b><a href="https://trac.sagemath.org/ticket/25436">#25436</a></b>(Merged) which is completed with the help of Meghana M Reddy. </p>
+                        <p> We need to decide in which file we are supposed to add the function, this leads to create a new file <i> connectivity.pyx </i>, it includes all the functions from generic_graph.py / graph.py / digraph.py which uses cut vertices/cut edges. Ticket <b><a href="https://trac.sagemath.org/ticket/25436">#25436</a></b>(Merged) which is completed with the help of Meghana M Reddy. </p>
                         <p>
-                            Before starting the main coding part, I worked on finalizing a longstanding open ticket <b><a href="https://trac.sagemath.org/ticket/22157">#22157</a></b>(Merged) on decomposing a graph into 3-vertex-connected components and constructing a SPQR tree. The idea is to use a method based on integer linear programming to find 2 vertex cuts of the graph, then construct the SPQR tree. Even though this method is not the best choice with respect to the computation time, it is not difficult to check the correctness of the code. 
+                            Before beginning with the SPQR-Tree linear implementation part, I worked on finalizing a longstanding open ticket <b><a href="https://trac.sagemath.org/ticket/22157">#22157</a></b>(Merged) on decomposing a graph into 3-vertex-connected components and constructing a SPQR tree. The idea is to use a method based on integer linear programming to find 2 vertex cuts of the graph, then construct the SPQR tree. Even though this method is not the best choice with respect to the computation time, it is not difficult to check the correctness of the code. 
                         </p>
                         <p>
                             The main motivation behind finalizing this ticket was to be able to compare the results of the method 1 & 2 and the correctness. </p>
@@ -179,31 +181,31 @@
                         </p>
                         <br>
 
-                        <b> Method 1: Cleave </b>
+                        <h3><b> Method 1: Cleave </b></h3>
                         <br> <br>
-                        <p> Cleave: For a connected unweighted multi-graph G and a vertex cut X, it computes the list of subgraphs of \(G\) induced by each connected component \(c\) of \(G\setminus X\) plus \(X\), i.e., \(G[c\cup X]\) </p>
+                        <p> Cleave: for a connected unweighted multi-graph G and a vertex cut X, it computes the list of subgraphs of \(G\) induced by each connected component \(c\) of \(G\setminus X\) plus \(X\), i.e., \(G[c\cup X]\) </p>
                         <ul >
                             <li> <p> It returns 3 list, </p> </li>
                             <li> <p> 1. S = List of connected component with cut vertices have virtual edges.</p> </li>
                             <li> <p> 2. C = is the graph of the cocycles, set of virtual edges created/added in connected components + one extra copy. </p> </li>
                             <li> <p>3. f = It's a graph with cut vertices and virtual edges. i.e the complement of the subgraph of ``G`` induced by cut vertices</p> </li>
-                            <li> <p>Algorithm:</p> </li>
-                            <li> <p> Input: Multi-Graph G, cut_vertex list </p> </li>
-                            <li> <p> Output: S, C, f </p> </li>
+                            <li> <p> <b> Algorithm: </b> </p> </li>
+                            <li> <p> <b>Input:</b> Multi-Graph G, cut_vertex list </p> </li>
+                            <li> <p> <b>Output:</b> S, C, f </p> </li>
                         </ul>
                         <ol >
                             <li> <p> If cut vertices are given, validate it else create a cut vertex list from graph G.</p> </li>
                             <li> <p> Find connected components after removing cut vertices from the cut vertex list.</p> </li>
                             <li> <p> To find virtual edges which are to be added, 
                             firstly find a subgraph with cut vertices then construct its complement graph which is f(virtual cut graph), all the edges f has will be added in the connected components, </p> </li>
-                            <li> <p> For all connected components, construct a subgraph with connected component vertices + cut vertices after that add all the edges we found in step 3, this will give us S.</p> </li>
+                            <li> <p> for all connected components, construct a subgraph with connected component vertices + cut vertices after that add all the edges we found in step 3, this will give us S.</p> </li>
                             <li> <p> cocycles = no. of edges in f (step 3) * (no. of connected component in (step 4) + 1). </p> </li>
                         </ol>
                     </div>
                     <div class="col-md-12">
                         <p> This method is extended with allowing the user to disable adding of virtual edges in connected components, if virtual_edge==false then f is a graph with isolated cut vertices i.e independent set. </p>
                         <br>
-                        Step 2: construction of SPQR-Tree using Cleave function as helper function.
+                        Step 2: Construction of SPQR-Tree using Cleave function as helper function.
                         <br> <br>
                         <p> <i>Definition</i>: The data structure SPQR-tree represents the decomposition of a biconnected graph with respect to its triconnected components.</p>
                         <p> The vertices of SPQR-Tree could be of 4 types given below.</p>
@@ -214,9 +216,9 @@
                             <li> <p> R (Rigid) Type: A 3-connected component. </p> </li>
                         </ol>
 
-                        <p> Algorithm: </p>
-                        <p> Input: multi-graph G </p>
-                        <p> Output: SPQR-Tree </p>
+                        <p> <b>Algorithm: </b></p>
+                        <p> <b>Input:</b> Multi-Graph G </p>
+                        <p> <b>Output:</b> SPQR-Tree </p>
                         
                         <ol>
                             <li> <p> Find cut vertices of input multi-graph G. </p></li>
@@ -233,16 +235,18 @@
                             <p> &emsp; &emsp; if not 2-connected block then push it to R_blocks list. </p></li>
                             <li> <p> create the P_block with the help of virtual edges which are added in S(step 4) </p> </li>
                             <li> <p> Creation of Tree: Create tree nodes from S_block, R_block and P_block. </p>
-                            <p> &emsp; For each edge in counter_multiple_edges: </p>
+                            <p> &emsp; for each edge in counter_multiple_edges: </p>
                             <p> &emsp; &emsp; P_block = ('P', [e]*num) </p>
                             <p> &emsp; &emsp; &emsp;for all blocks in S & R: </p>
                             <p> &emsp; &emsp; &emsp; &emsp;if any block contains this edge, create an edge between Tree.add_edge(p_block, block) 
                             </p></li>
                         </ol>
                         <p>The second most important thing is to verify the output of our function, so we created a function which takes input as SPQR-Tree and outputs Graph H. If  H.is_isomorphic(G) ==True then SPQR-Tree is correct. </p>
-                        <p> Algorithm: </p>
+                        <p> <b>Algorithm:</b> </p>
+                        <p> <b>Input:</b> SPQR-Tree</p>
+                        <p> <b>Output:</b> A Graph through which input SPQR-Tree is generated.</p>
                         <ol>
-                            <li> <p> Make two dictionary namely count_p and count_g. For all vertices in input SPQR-Tree, if the vertex has P or Q label, update count_p with edges and their count. similarly, for S and R label vertices, update count_g dict. </p></li>
+                            <li> <p> Make two dictionary namely count_p and count_g. for all vertices in input SPQR-Tree, if the vertex has P or Q label, update count_p with edges and their count. similarly, for S and R label vertices, update count_g dict. </p></li>
                             <li> <p> Iterate over all the edges of count_g if that edge is available then num = count_p[edge] - count_g[e] and add num, no. of times edge in H. </p></li>
                             <li> <p> Now Iterate over all the edges in count_p and if that edge is not available in count_g, directly add that edge with it's respective count from count_p in H. </p></li>
                             <li> <p> Return H </p></li>
@@ -250,8 +254,8 @@
                         <b> Method 2: Hopcroft_Tarjan<a href="#Reference">[1]</a> </b>
                         <br> <br>
                         <p> The linear time algorithm of SPQR-Tree is: </p>
-                        <p> Input: Multi-Graph </p>
-                        <p> output: SPQR-Tree </p>
+                        <p> <b>Input:</b> Multi-Graph </p>
+                        <p> <b>output:</b> SPQR-Tree </p>
                         <p> It consists of 4 modules </p>
                         <p> <b> Module 1:</b> Appending multiple edges from input graph G to respective
                         components (split_multi_egdes()), in this module a simple graph is constructed from the input graph and all the multiple edges are stored in components. </p>
