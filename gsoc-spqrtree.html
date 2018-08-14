@@ -119,13 +119,15 @@
                     <div class="col-md-12 text-center">
                         <h2> Google Summer of Code 2018 </h2>
                         <h2> A Linear Time Implementation of SPQR-Trees </h2>
-                        <p> This project is part of GSoC-2018. In this project, a python module is developed which first generates triconnected components then constructs SPQR-Tree in linear time. The module is to be integrated into SageMath graph library and was developed under the guidance of David Coudert and Dima Pasechnik. The implementation algorithm was first proposed by Hopcroft and Tarjan<a href="#Reference">[1]</a> and later corrected by Gutwenger and Mutzel<a href="#Reference">[2]</a> </p>
+                        <p> 
+                            This project is part of GSoC-2018. The objective of this project is to implement in Python the linear time algorithm first proposed by Hopcroft and Tarjan<a href="#Reference">[1]</a> and later corrected by Gutwenger and Mutzel<a href="#Reference">[2]</a> to decompose a (multi)graph into triconnected components and organize these components into a SPQR-tree. The code is to be integrated into SageMath graph library. This project has been conducted under the guidance of David Coudert and Dima Pasechnik. 
+                        </p>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
                         <h2> <b>The Journey <b></h2>
-                            <ul class="wow fadeInUp animated " data-wow-delay=".4s">
+                            <ul >
                                 <li>
                                     <h3> Getting started </h3>
                                 </li>
@@ -138,7 +140,7 @@
                                         It was first defined by Bavelas (1950)<a href="#Reference">[3]</a>, on a connected undirected Graph G = (V, E) and n = number of vertices = |V|, an inverse of <i>fareness</i>, where farness is inverse of average of the shortest paths from v to u \( \in  \) V,  below is the algorithm.
                                     </p>
                                 </li>
-                            </ul class="wow fadeInUp animated " data-wow-delay=".4s">
+                            </ul >
                             <ol>
                                 <li> <p> \(S\) = k random vertices from n vertices of input graph G.  </p> </li>
                                 <li> <p> Run k time BFS from the vertices in \(S\). Which will give k*n distances, where n is no. of vertices.</p> </li>
@@ -148,20 +150,29 @@
                             </ol>
                     </div>
                     <div class="col-md-12">
-                       <p> While implementing this algorithm in cython, we found that there is a scope to improve the existing definition of simple_bfs, which leads to creating the patch <b><a href="https://trac.sagemath.org/ticket/25223">#25223</a></b>(Merged), in which we made the definition of simple_bfs function more user-friendly and updated all the dependent functions of simple_bfs function. by end of this two patches, I got the good knowledge of cython and sagemath code base.  </p>
+                       <p> While implementing this algorithm in Python, we found that there is a scope to improve the reusablility of simple_bfs function, which leads to creating the patch <b><a href="https://trac.sagemath.org/ticket/25223">#25223</a></b>(Merged), in which we made the simple_bfs function more generic and updated all the dependent functions of simple_bfs function. by end of this two patches, I got the good knowledge of cython and sagemath code base.  </p>
                     </div>
                     <div class="col-md-12">
-                        <ul class="wow fadeInUp animated " data-wow-delay=".4s">
+                        <ul >
                             <li><h3> Start working on SPQR-Tree </h3></li>                            
                         </ul>
                     <div class="col-md-12"> 
-                        <p> starting the coding part </p>
-                        <p> Before starting the main coding part we need to decide in which file we are supposed to add the function, this leads to creates a new file connectivity.pyx, it includes all the function from generic_graph.py / graph.py / digraph.py which uses cut vertices or cut edges. ticket <b><a href="https://trac.sagemath.org/ticket/25436">#25436</a></b>(Merged) which is completed with the help of Meghana M Reddy. </p>
+                        <p> Starting the coding part </p>
+                        <p> We need to decide in which file we are supposed to add the function, this leads to create a new file connectivity.pyx, it includes all the function from generic_graph.py / graph.py / digraph.py which uses cut vertices or cut edges. ticket <b><a href="https://trac.sagemath.org/ticket/25436">#25436</a></b>(Merged) which is completed with the help of Meghana M Reddy. </p>
+                        <p>
+                            Before starting the main coding part, I worked on finalizing a longstanding open ticket <b><a href="https://trac.sagemath.org/ticket/22157">#22157</a></b>(Merged) on decomposing a graph into 3-vertex-connected components and constructing a SPQR tree. The idea is to use a method based on integer linear programming to find the 2 vertex cuts of the graph, and then construct the SPQR tree. Even though this method is not the best choice with respect to the computation time, it is not difficult to check the correctness of the code. 
+                        </p>
+                        <p>
+                            The main motivation behind finalizing this ticket was to be able to compare the results of the method 1 & 2 and the correctness. </p>
+                        <p> 
+                            Below is the brief explanation of method 1.
+                        </p>
                         <br>
+
                         <b> Method 1: Cleave </b>
                         <br> <br>
                         <p> Cleave: For a connected unweighted multi-graph G and a vertex cut X, it computes the list of subgraphs of \(G\) induced by each connected component \(c\) of \(G\setminus X\) plus \(X\), i.e., \(G[c\cup X]\) </p>
-                        <ul class="wow fadeInUp animated " data-wow-delay=".4s">
+                        <ul >
                             <li> <p> It returns 3 lists, </p> </li>
                             <li> <p> 1. S = List of connected component with cut vertices have virtual edges.</p> </li>
                             <li> <p> 2. C = is the graph of the cocycles, set of virtual edges created/added in connected components + one extra copy. </p> </li>
@@ -170,7 +181,7 @@
                             <li> <p> Input: Multi-Graph G, cut_vertex list </p> </li>
                             <li> <p> Output: S, C, f </p> </li>
                         </ul>
-                        <ol>
+                        <ol >
                             <li> <p> If cut vertices are given validate it, else create a cut vertex list from graph G.</p> </li>
                             <li> <p> Find connected components after removing cut vertices from cut vertex list.</p> </li>
                             <li> <p> To find what are the virtual edges need to be added, 
@@ -186,7 +197,7 @@
                         <br> <br>
                         <p> <i>Definition</i>: The data structure SPQR-tree represents the decomposition of a biconnected graph with respect to its triconnected components.</p>
                         <p> The vertices of SPQR-Tree with being either of 4 types given below.</p>
-                        <ol class="wow fadeInUp animated " data-wow-delay=".5s">
+                        <ol >
                             <li> <p> S (Series) Type: A cyclic graph with atleast 3 vertices. </p> </li>
                             <li> <p> P (parallel) Type: A multi-graph with 2 vertices and multiple edges between them. </p> </li>
                             <li> <p> Q (Trivial case) Type: the associated graph has a single real edge. This trivial case is necessary to handle the graph that has only one edge. </p> </li>
@@ -226,7 +237,7 @@
                             <li> <p> Not Iterate over all the edges in count_p and if that edge is not available in count_g add directly that edge with it's respective count from count_p in H. </p></li>
                             <li> <p> return H </p></li>
                         </ol>
-                        <p> The complete work of method 1 is done in ticket <b><a href="https://trac.sagemath.org/ticket/22157">#22157</a></b>(Merged) </p>
+                        <p> The complete work of method 1 is done in  </p>
                         <b> Method 2: Hopcroft_Tarjan<a href="#Reference">[1]</a> </b>
                         <p> The linear time algorithm of SPQR-Tree. </p>
                         <p> Input: Multi-Graph </p>
@@ -240,6 +251,10 @@
                         <p> Module 2 and Module 3 are done by Meghana M reddy and remaining Module 1 & 4 are done by me. </p>
                         <p> The output of the code is tested by spqrtree_to_graph function i.e which is developed in method 1. Method 1 mostly act as verification code for method 2. Method 2 running time is in linear order which is much better than method 1. </p>
                         <p> The complete work of method 2 is done in ticket <b><a href="https://trac.sagemath.org/ticket/25598">#25598</a></b>, it's in the process of getting merge. </p>
+
+                        <h2> <b> Conclusion: </b> </h2>
+                        <p> This project is the first open-source python implementation of static SPQR-Tree in linear time, the extension of this work could be the implementation of dynamic SPQR-Tree/cythonizing the implementation of method 2 or it's application on planar graph embedding. </p>
+
                         <h2> <b> GSoC Experience: <b></h2>
                         <p>
                             It was a great experience working with SageMath, I learned how one should code/write the comments such that if anyone is going to use/modify my work should spend the least time in understanding it. Not only this, it gave me an opportunity to explore how actually open source organization works, I am grateful that I got this opportunity. My mentors David Coudert and Dima Pasechnik are very supportive not only in giving guidance but also helping in coding side.
